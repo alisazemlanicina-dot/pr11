@@ -1,0 +1,15 @@
+default_platform(:android)
+
+platform :android do
+  desc "Deploy to Internal Testing Track"
+  lane :internal do
+    gradle(task: "bundleRelease")
+    upload_to_play_store(
+      track: 'internal',
+      aab: '../app/build/outputs/bundle/release/app-release.aab',
+      skip_upload_metadata: true,
+      skip_upload_changelogs: false,
+      json_key_data: ENV['PLAY_STORE_JSON_KEY']
+    )
+  end
+end
