@@ -1,12 +1,12 @@
-name: Deploy to Google Play
+name: Android Build
 
 on:
   push:
     tags:
-      - 'v*' # Запуск при пуше тега, например v1.0.0
+      - 'v*'
 
 jobs:
-  production-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,13 +24,17 @@ jobs:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: echo "$KEYSTORE_BASE64" | base64 --decode > keystore.jks
 
-      - name: Install Fastlane
-        run: bundle install
-
-      - name: Build and Upload to Internal Track
+      # Собираем релизный APK (без загрузки в Google Play)
+      - name: Build Release APK
         env:
-          PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: bundle exec fastlane internal
+        run: ./gradlew assembleRelease --no-daemon
+
+      # Сохраняем готовый APK, чтобы ты могла его скачать
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr11-release-apk
+          path: app/build/outputs/apk/release/app-release.apk
