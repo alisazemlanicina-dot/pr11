@@ -3,7 +3,7 @@ name: Deploy to Google Play
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*' # Запуск при пуше тега, например v1.0.0
 
 jobs:
   production-deploy:
@@ -17,6 +17,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+          cache: gradle
 
       - name: Decode Keystore
         env:
@@ -29,4 +30,7 @@ jobs:
       - name: Build and Upload to Internal Track
         env:
           PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: bundle exec fastlane internal
